@@ -178,20 +178,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "lib-rust-smtp-server"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-trait",
- "futures",
- "regex",
- "rustls-pemfile",
- "thiserror",
- "tokio",
- "tokio-rustls",
-]
-
-[[package]]
 name = "libc"
 version = "0.2.141"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -342,6 +328,20 @@ dependencies = [
  "untrusted",
  "web-sys",
  "winapi",
+]
+
+[[package]]
+name = "rust-smtp-server"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "futures",
+ "regex",
+ "rustls-pemfile",
+ "thiserror",
+ "tokio",
+ "tokio-rustls",
 ]
 
 [[package]]
