@@ -11,7 +11,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-rust-smtp-server = "0.1"
+rust-smtp-server = "0.1.1"
 ```
 
 ## Example
