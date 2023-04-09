@@ -7,7 +7,7 @@ use anyhow::{
     Result,
 };
 
-use tokio::io::{AsyncRead};
+use tokio::io::AsyncRead;
 
 type BodyType = String;
 
@@ -15,10 +15,10 @@ type BodyType = String;
 //const BODY_8BIT_MIME: BodyType = "8BITMIME".to_string();
 //const BODY_BINARY_MIME: BodyType = "BINARYMIME".to_string();
 
-pub trait Backend: Clone + Send + Sync + 'static {
+pub trait Backend: Send + Sync + 'static {
     type S: Session + Send;
 
-    fn new_session(&mut self) -> Result<Self::S>;
+    fn new_session(&self) -> Result<Self::S>;
 }
 
 pub struct MailOptions {
@@ -55,5 +55,5 @@ pub trait Session {
 
     async fn rcpt(&mut self, to: &str) -> Result<()>;
 
-    async fn data<R: AsyncRead + Send + Unpin>(&mut self, data_reader: R) -> Result<()>;
+    async fn data<R: AsyncRead + Send + Unpin>(&mut self, r: R) -> Result<()>;
 }

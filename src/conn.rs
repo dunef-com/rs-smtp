@@ -156,7 +156,7 @@ impl<B: Backend> Conn<B> {
         };
     }
 
-    pub async fn handle(&mut self, cmd: String, arg: String, server: &mut Server<B>) {
+    pub async fn handle(&mut self, cmd: String, arg: String, server: &Server<B>) {
         if cmd.is_empty() {
             self.protocol_error(500, [5,5,2], "Error: bad syntax".to_string()).await;
             return;
@@ -235,7 +235,7 @@ impl<B: Backend> Conn<B> {
         self.helo.clone()
     }
 
-    pub async fn handle_greet(&mut self, enhanced: bool, arg: String, server: &mut Server<B>) {
+    pub async fn handle_greet(&mut self, enhanced: bool, arg: String, server: &Server<B>) {
         self.helo = arg;
 
         match server.backend.new_session() {
@@ -280,7 +280,7 @@ impl<B: Backend> Conn<B> {
         self.write_response(250, NO_ENHANCED_CODE, caps.iter().map(|s| s.as_str()).collect::<Vec<&str>>().as_slice()).await;
     }
 
-    pub async fn handle_mail(&mut self, arg: String, server: &mut Server<B>) {
+    pub async fn handle_mail(&mut self, arg: String, server: &Server<B>) {
         if self.helo.len() == 0 {
             self.write_response(502, [2,5,1], &["Please introduce yourself first."]).await;
             return;
@@ -487,7 +487,7 @@ impl<B: Backend> Conn<B> {
 
     // TODO handle_auth
 
-    pub async fn handle_starttls(&mut self, server: &mut Server<B>) {
+    pub async fn handle_starttls(&mut self, server: &Server<B>) {
         if let StreamState::Unsafe(stream) = self.stream.clone() {
             if server.tls_acceptor.is_none() {
                 self.write_response(502, [5,5,1], &["TLS not supported"]).await;
@@ -523,7 +523,7 @@ impl<B: Backend> Conn<B> {
         }
     }
 
-    pub async fn handle_data(&mut self, arg: String, server: &mut Server<B>) {
+    pub async fn handle_data(&mut self, arg: String, server: &Server<B>) {
         if arg.len() > 0 {
             self.write_response(501, [5,5,4], &["DATA command should not have any arguments"]).await;
             return;
@@ -560,7 +560,7 @@ impl<B: Backend> Conn<B> {
         self.reset().await;
     }
 
-    pub async fn handle_bdat(&mut self, arg: String, server: &mut Server<B>) {
+    pub async fn handle_bdat(&mut self, arg: String, server: &Server<B>) {
         let args: Vec<&str> = arg.split_whitespace().collect();
         if args.is_empty() {
             self.write_response(501, [5,5,4], &["Missing chunk size argument"]).await;

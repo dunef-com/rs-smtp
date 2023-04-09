@@ -1,23 +1,6 @@
-# rust-smtp-server
-A rust smtp server library.
-It's mainly a rewrite of the server side parts of the [emersion/go-smtp](https://github.com/emersion/go-smtp) library.
-
-## Features
-
-
-## Usage
-
-Add this to your `Cargo.toml`:
-
-```toml
-[dependencies]
-rust-smtp-server = "0.1"
-```
-
-## Example
-
-```rust
-use anyhow::Result;
+use anyhow::{
+    Result,
+};
 use async_trait::async_trait;
 use tokio::io::{self, AsyncReadExt, AsyncRead};
 
@@ -92,21 +75,3 @@ async fn main() -> Result<()> {
 
     Ok(())
 }
-```
-
-You can use the server manually with telnet:
-    
-```bash
-telnet localhost 2525
-EHLO localhost
-MAIL FROM:<root@nsa.gov>
-RCPT TO:<root@gchq.gov.uk>
-DATA
-Hey <3
-.
-```
-
-## License
-
-MIT
-

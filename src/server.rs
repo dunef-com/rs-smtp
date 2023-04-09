@@ -19,7 +19,6 @@ use tokio_rustls::TlsAcceptor;
 
 const ERR_TCP_AND_LMTP: &str = "smtp: cannot start LMTP server listening on a TCP socket";
 
-#[derive(Clone)]
 pub struct Server<B: Backend> {
     pub addr: String,
     pub tls_acceptor: Option<TlsAcceptor>,
@@ -73,10 +72,11 @@ impl<B: Backend> Server<B> {
     }
 
     pub async fn serve(self, l: TcpListener) -> Result<()> {
+        let mut server = Arc::new(self);
         loop {
             match l.accept().await {
                 Ok((conn, _)) => {
-                    let mut server = self.clone();
+                    let mut server = server.clone();
                     tokio::spawn(async move {
                         if let Err(err) = server.handle_conn(Conn::new(conn, server.max_line_length)).await {
                             println!("Error: {}", err);
@@ -90,7 +90,7 @@ impl<B: Backend> Server<B> {
         }
     }
 
-    pub async fn handle_conn(&mut self, mut c: Conn<B>) -> Result<()> {
+    pub async fn handle_conn(&self, mut c: Conn<B>) -> Result<()> {
         c.greet(self.domain.clone()).await;
 
         let mut buf_reader = io::BufReader::new(c.text.conn.clone());

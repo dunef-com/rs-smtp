@@ -17,5 +17,14 @@ regex = "1"
 tokio = { version = "1.26.0", features = ["full"] }
 tokio-rustls = "0.23.4"
 async-trait = "0.1.67"
+
+[dev-dependencies]
 rustls-pemfile = "1"
-futures = "0.3"
+
+[[bin]]
+name = "simple"
+path = "examples/simple.rs"
+
+[[bin]]
+name = "with_starttls_support"
+path = "examples/with_starttls_support.rs"
