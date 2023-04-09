@@ -1,6 +1,6 @@
 [package]
 name = "rust-smtp-server"
-version = "0.1.0"
+version = "0.1.1"
 description = "A rust smtp server library."
 
 edition = "2021"
