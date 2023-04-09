@@ -1,7 +1,10 @@
 [package]
 name = "rust-smtp-server"
 version = "0.1.0"
+description = "A rust smtp server library."
+
 edition = "2021"
+license = "MIT"
 authors = ["Nick Westendorf"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

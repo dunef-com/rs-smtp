@@ -87,7 +87,7 @@ impl Session for MySession {
 async fn main() -> Result<()> {
     let be = MyBackend;
 
-    let mut s = server::Server::new(be);
+    let mut s = Server::new(be);
 
     s.addr = "127.0.0.1:2525".to_string();
     s.domain = "localhost".to_string();
