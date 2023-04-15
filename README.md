@@ -1,8 +1,11 @@
 # rust-smtp-server
-A rust smtp server library.
-It's mainly a rewrite of the server side parts of the [emersion/go-smtp](https://github.com/emersion/go-smtp) library.
+An ESMTP server library written in Rust.
 
 ## Features
+
+- ESMTP client & server implementing RFC 5321
+- Support for SMTP AUTH and PIPELINING
+- UTF-8 support for subject and message body
 
 
 ## Usage
@@ -11,7 +14,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-rust-smtp-server = "0.1.1"
+rs-smtp = "0.1.0"
 ```
 
 ## Example

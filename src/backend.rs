@@ -1,3 +1,4 @@
+use crate::conn::Conn;
 use crate::data::SMTPError;
 
 use async_trait::async_trait;
@@ -15,10 +16,10 @@ type BodyType = String;
 //const BODY_8BIT_MIME: BodyType = "8BITMIME".to_string();
 //const BODY_BINARY_MIME: BodyType = "BINARYMIME".to_string();
 
-pub trait Backend: Send + Sync + 'static {
+pub trait Backend: Send + Sync + 'static + Sized {
     type S: Session + Send;
 
-    fn new_session(&self) -> Result<Self::S>;
+    fn new_session(&self, c: &mut Conn<Self>) -> Result<Self::S>;
 }
 
 pub struct MailOptions {
@@ -43,11 +44,7 @@ impl MailOptions {
 
 #[async_trait]
 pub trait Session {
-    fn reset(&mut self);
-
-    fn logout(&mut self) -> Result<()>;
-
-    fn auth_plain(&mut self, username: &str, password: &str) -> Result<()> {
+    async fn auth_plain(&mut self, _username: &str, _password: &str) -> Result<()> {
         Err(anyhow!(SMTPError::err_auth_unsupported().error()))
     }
 
@@ -56,4 +53,8 @@ pub trait Session {
     async fn rcpt(&mut self, to: &str) -> Result<()>;
 
     async fn data<R: AsyncRead + Send + Unpin>(&mut self, r: R) -> Result<()>;
+
+    fn reset(&mut self);
+
+    fn logout(&mut self) -> Result<()>;
 }

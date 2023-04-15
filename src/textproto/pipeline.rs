@@ -65,7 +65,7 @@ impl Sequencer {
         let (tx, rx) = oneshot::channel();
         self.wait.insert(id, tx);
         drop(this_id);
-        rx.await;
+        let _ = rx.await;
     }
 
     pub fn end(&mut self, mut id: u64) {

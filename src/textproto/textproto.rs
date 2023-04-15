@@ -1,11 +1,8 @@
+use std::sync::{Arc, Mutex};
+
 use anyhow::Result;
 use thiserror::Error;
-use crate::stream::Stream;
-use std::net::{IpAddr, Ipv4Addr, SocketAddr};
-use std::pin::Pin;
-use std::sync::{Arc, Mutex};
-use tokio::net::TcpStream;
-use tokio::io::{AsyncWrite, AsyncRead, AsyncWriteExt, AsyncBufReadExt, BufReader};
+use tokio::io::{AsyncWrite, AsyncRead};
 
 use super::pipeline::Pipeline;
 use super::writer::Writer;
@@ -22,20 +19,17 @@ impl std::fmt::Display for MyError {
     }
 }
 
-type ProtocolError = String;
-
-pub struct Conn<RW: AsyncRead + AsyncWrite + Clone + Unpin> {
-    pub writer: Writer<RW>,
+pub struct Conn<W: AsyncWrite + Unpin> {
+    pub writer: Writer<W>,
     pub pipeline: Pipeline,
-    pub conn: RW,
 }
 
-impl<RW: AsyncRead + AsyncWrite + Clone + Unpin> Conn<RW> {
-    pub fn new(stream: RW) -> Self {
+impl<W: AsyncWrite + Unpin> Conn<W> {
+    pub fn new(stream: Arc<tokio::sync::Mutex<W>>) -> Self {
+
         Self {
-            writer: Writer::new(stream.clone()),
+            writer: Writer::new(stream),
             pipeline: Pipeline::new(),
-            conn: stream,
         }
     }
 

@@ -1,6 +1,6 @@
 use std::{pin::Pin, future::Future, task::Poll};
 
-use tokio::io::{self, AsyncBufRead, AsyncRead, AsyncReadExt};
+use tokio::io::{self, AsyncRead, AsyncReadExt};
 
 use crate::{backend::{Backend}};
 
@@ -74,7 +74,7 @@ pub struct DataReader<R: AsyncRead + Unpin> {
     n: usize,
 }
 
-impl<R: AsyncBufRead + Unpin> DataReader<R> {
+impl<R: AsyncRead + Unpin> DataReader<R> {
     pub fn new<B: Backend>(r: R, max_message_bytes: usize) -> Self {
         DataReader {
             r,
@@ -85,7 +85,7 @@ impl<R: AsyncBufRead + Unpin> DataReader<R> {
     }
 }
 
-impl<R: AsyncBufRead + Unpin> AsyncRead for DataReader<R> {
+impl<R: AsyncRead + Unpin> AsyncRead for DataReader<R> {
     fn poll_read(
         self: std::pin::Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,

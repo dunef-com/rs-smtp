@@ -1,12 +1,5 @@
-use std::sync::{Arc};
-
-
-
 use anyhow::{bail, Result};
-use tokio::{io::{ReadHalf, AsyncRead, AsyncReadExt}, net::TcpStream};
-use crate::stream::Stream;
-
-use std::sync::Mutex;
+use tokio::io::{AsyncRead, AsyncReadExt};
 
 const ERR_TOO_LONG_LINE: &str = "smtp: too long a line in input stream";
 

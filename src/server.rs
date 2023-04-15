@@ -1,23 +1,27 @@
-use crate::backend::{
-    Backend,
-    Session,
-};
+use crate::backend::{Backend, Session};
 use crate::conn::Conn;
 use crate::parse::parse_cmd;
+
+use std::collections::HashMap;
 use std::pin::Pin;
 use std::sync::Arc;
-
-
-use anyhow::Result;
-use tokio::sync::Mutex;
 use std::time::Duration;
 
-use tokio::io::{self, BufWriter, AsyncBufReadExt, AsyncReadExt};
-use tokio::net::{TcpListener, TcpStream};
+use rs_sasl::sasl;
+
+use anyhow::{bail, Result};
+
+use futures::executor;
+
+use tokio::io::{self, AsyncBufReadExt};
+use tokio::net::TcpListener;
 use tokio_rustls::TlsAcceptor;
 
 
-const ERR_TCP_AND_LMTP: &str = "smtp: cannot start LMTP server listening on a TCP socket";
+// const ERR_TCP_AND_LMTP: &str = "smtp: cannot start LMTP server listening on a TCP socket";
+
+/// A function that creates SASL servers.
+pub type SaslServerFactory<B> = dyn Fn(&Conn<B>) -> Box<dyn sasl::Server> + Send + Sync;
 
 pub struct Server<B: Backend> {
     pub addr: String,
@@ -42,6 +46,7 @@ pub struct Server<B: Backend> {
     pub backend: B,
 
     pub caps: Vec<String>,
+    pub auths: HashMap<String, Box<SaslServerFactory<B>>>,
 
     //pub listeners: Mutex<Vec<TcpListener>>,
 
@@ -67,18 +72,49 @@ impl<B: Backend> Server<B> {
             auth_disabled: false,
             backend: be,
             caps: vec!["PIPELINING".to_string(), "8BITMIME".to_string(), "ENHANCEDSTATUSCODES".to_string(), "CHUNKING".to_string()],
+            auths: HashMap::from([
+                (
+                    rs_sasl::plain::PLAIN.to_string(),
+                    Box::new(|c: &Conn<B>| {
+                        let c_pointer = c as *const Conn<B>;
+                        let c = unsafe { // ! USE OF UNSAFE ! Needs to be reviewed or even rewritten with a better solution
+                            &*c_pointer
+                        };
+                        Box::new(rs_sasl::plain::PlainServer::new(Box::new(move |identity, username, password| {
+                            // test if identity is empty or equal to username
+
+                            if !identity.is_empty() && identity != username {
+                                bail!("Identities not supported");
+                            }
+
+                            let mut sess = executor::block_on(async {
+                                c.session.lock().await
+                            });
+
+                            if sess.is_none() {
+                                bail!("No session when AUTH is called");
+                            }
+                            let sess = sess.as_mut().unwrap();
+
+                            executor::block_on(async {
+                                sess.auth_plain(username, password).await
+                            })
+                        }))) as Box<dyn sasl::Server>
+                    }) as Box<SaslServerFactory<B>>
+                )
+            ]),
             //listeners: Mutex::new(vec![]),
         }
     }
 
     pub async fn serve(self, l: TcpListener) -> Result<()> {
-        let mut server = Arc::new(self);
+        let server = Arc::new(self);
         loop {
             match l.accept().await {
                 Ok((conn, _)) => {
-                    let mut server = server.clone();
+                    let server = server.clone();
                     tokio::spawn(async move {
-                        if let Err(err) = server.handle_conn(Conn::new(conn, server.max_line_length)).await {
+                        if let Err(err) = server.clone().handle_conn(Conn::new(conn, server.max_line_length)).await {
                             println!("Error: {}", err);
                         }
                     });
@@ -93,15 +129,16 @@ impl<B: Backend> Server<B> {
     pub async fn handle_conn(&self, mut c: Conn<B>) -> Result<()> {
         c.greet(self.domain.clone()).await;
 
-        let mut buf_reader = io::BufReader::new(c.text.conn.clone());
-
         loop {
             let mut line = String::new();
-            match buf_reader.read_line(&mut line).await {
+            let clone = c.stream.clone();
+            let mut reader = io::BufReader::new(Pin::new(clone.lock().await));
+            match reader.read_line(&mut line).await {
                 Ok(0) => {
                     return Ok(());
                 }
                 Ok(_) => {
+                    drop(reader);
                     match parse_cmd(line) {
                         Ok((cmd, arg)) => {
                             c.handle(cmd, arg, self).await;
@@ -114,6 +151,7 @@ impl<B: Backend> Server<B> {
                     }
                 }
                 Err(err) => {
+                    drop(reader);
                     match err.kind() {
                         std::io::ErrorKind::TimedOut => {
                             c.write_response(221, [2,4,2], &["Idle timeout, bye bye"]).await;

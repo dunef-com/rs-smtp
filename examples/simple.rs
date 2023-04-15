@@ -1,9 +1,16 @@
 use anyhow::Result;
 use async_trait::async_trait;
-use tokio::io::{self, AsyncReadExt, AsyncRead};
+use tokio::io::{AsyncReadExt, AsyncRead};
 
-use rust_smtp_server::backend::{Backend, Session, MailOptions};
-use rust_smtp_server::server::Server;
+use base64::{
+    engine::general_purpose,
+    Engine as _,
+};
+
+
+use rs_smtp::backend::{Backend, Session, MailOptions};
+use rs_smtp::conn::Conn;
+use rs_smtp::server::Server;
 
 struct MyBackend;
 
@@ -12,14 +19,17 @@ struct MySession;
 impl Backend for MyBackend {
     type S = MySession;
 
-    fn new_session(&self) -> Result<MySession> {
+    fn new_session(&self, _c: &mut Conn<Self>) -> Result<MySession> {
         Ok(MySession)
     }
 }
 
 #[async_trait]
 impl Session for MySession {
-    fn auth_plain(&mut self, _username: &str, _password: &str) -> Result<()> {
+    async fn auth_plain(&mut self, username: &str, password: &str) -> Result<()> {
+        println!("username: {username}");
+        println!("password: {password}");
+
         Ok(())
     }
     
@@ -33,12 +43,11 @@ impl Session for MySession {
         Ok(())
     }
     
-    async fn data<R: AsyncRead + Send + Unpin>(&mut self, r: R) -> Result<()> {
+    async fn data<R: AsyncRead + Send + Unpin>(&mut self, mut r: R) -> Result<()> {
         // print whole message
-        let mut data = Vec::new();
-        let mut reader = io::BufReader::new(r);
-        reader.read_to_end(&mut data).await?;
-        println!("data: {}", String::from_utf8_lossy(&data));
+        let mut mail = String::new();
+        r.read_to_string(&mut mail).await?;
+        println!("data: {}", mail);
 
         Ok(())
     }
@@ -63,7 +72,7 @@ async fn main() -> Result<()> {
     s.max_message_bytes = 10 * 1024 * 1024;
     s.max_recipients = 50;
     s.max_line_length = 1000;
-    s.allow_insecure_auth = true;
+    s.allow_insecure_auth = false;
 
     println!("Starting server on {}", s.addr);
     match s.listen_and_serve().await {
