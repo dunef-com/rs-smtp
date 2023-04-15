@@ -1,8 +1,8 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 use anyhow::Result;
 use thiserror::Error;
-use tokio::io::{AsyncWrite, AsyncRead};
+use tokio::io::AsyncWrite;
 
 use super::pipeline::Pipeline;
 use super::writer::Writer;
@@ -26,7 +26,6 @@ pub struct Conn<W: AsyncWrite + Unpin> {
 
 impl<W: AsyncWrite + Unpin> Conn<W> {
     pub fn new(stream: Arc<tokio::sync::Mutex<W>>) -> Self {
-
         Self {
             writer: Writer::new(stream),
             pipeline: Pipeline::new(),

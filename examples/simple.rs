@@ -2,12 +2,6 @@ use anyhow::Result;
 use async_trait::async_trait;
 use tokio::io::{AsyncReadExt, AsyncRead};
 
-use base64::{
-    engine::general_purpose,
-    Engine as _,
-};
-
-
 use rs_smtp::backend::{Backend, Session, MailOptions};
 use rs_smtp::conn::Conn;
 use rs_smtp::server::Server;

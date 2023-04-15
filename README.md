@@ -1,4 +1,4 @@
-# rust-smtp-server
+# rs-smtp
 An ESMTP server library written in Rust.
 
 ## Features
@@ -14,7 +14,11 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-rs-smtp = "0.1.0"
+rs-smtp = "0.1.1"
+
+anyhow = "1.0"
+tokio = { version = "1.26.0", features = ["full"] }
+async-trait = "0.1.67"
 ```
 
 ## Example
@@ -24,8 +28,8 @@ use anyhow::Result;
 use async_trait::async_trait;
 use tokio::io::{self, AsyncReadExt, AsyncRead};
 
-use rust_smtp_server::backend::{Backend, Session, MailOptions};
-use rust_smtp_server::server::Server;
+use rs_smtp::backend::{Backend, Session, MailOptions};
+use rs_smtp::server::Server;
 
 struct MyBackend;
 

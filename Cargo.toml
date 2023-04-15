@@ -1,6 +1,6 @@
 [package]
 name = "rs-smtp"
-version = "0.1.0"
+version = "0.1.1"
 description = "An ESMTP server library written in Rust."
 
 edition = "2021"
