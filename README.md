@@ -14,7 +14,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-rs-smtp = "0.1.1"
+rs-smtp = "1"
 
 anyhow = "1.0"
 tokio = { version = "1.26.0", features = ["full"] }
