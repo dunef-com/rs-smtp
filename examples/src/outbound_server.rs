@@ -48,7 +48,7 @@ struct MyPlainAuthenticator;
 #[async_trait]
 impl PlainAuthenticator for MyPlainAuthenticator {
     async fn authenticate(&mut self, _identity: &str, username: &str, password: &str) -> Result<()> {
-        if username == "nick@dunef.io" && password == "TU1GMF&7DDPSX7u" {
+        if username == "nick@dunef.io" && password == "test" {
             Ok(())
         } else {
             Err(anyhow::anyhow!("invalid username or password"))
@@ -85,7 +85,7 @@ impl Session for MySession {
         let pk_rsa = RsaKey::<Sha256>::from_rsa_pem(DKIM_KEY).unwrap();
         let signer = DkimSigner::from_key(pk_rsa)
             .domain("dunef.io")
-            .selector("dunefio")
+            .selector("dkim_selector")
             .headers(["From", "To", "Subject"])
             .expiration(60 * 60 * 7);
 
@@ -148,7 +148,7 @@ async fn main() -> Result<()> {
 
     let mut s = Server::new(be);
 
-    s.addr = "45.142.178.124:587".to_string();
+    s.addr = "127.0.0.1:587".to_string();
     s.domain = "dunef.io".to_string();
     s.read_timeout = std::time::Duration::from_secs(10);
     s.write_timeout = std::time::Duration::from_secs(10);
@@ -202,10 +202,10 @@ sAxjy5HKHlJtZGtvmQhIO/Q4JXbzIlxHPA/xczleNNvGLln2iE9LM+o4cHMWBHOi
 GITsKgAvvhUqMa8YGXU+esyjs8jo51fyo/XdqUE3iLjm3+d2ZZnC8vjpKdVOIfGd
 C/8TLXDFkj1MawRVEBgV06Mqnjxg9pPEwcuxYhTWXxwKXjLCoJ2NmXx4k5+6vsDC
 5mqnb0/aOIMX6ZCmkTWS6Sn9HuvVJ3Qvmb3FVh8gk4WY2xS7//emS9hXsrj9qZez
-AJxP+Qp9AoGBAO5oK523lRy4yqRqHxEME6aRxKzG74zWVMYKS0SpY8lU7YQDe8AW
+AJxP+Qp9AoGBAO5oK523lRR4yqRqHxEME6aRxKzG74zWVMYKS0SpY8lU7YQDe8AW
 xwN4c4FPnxIplm/XNT/EUA8bQ9lZBY8rasTB6nYegujwbITk/QIT7CHdUxmZ4keW
 3K18Yn3RZjYJrxAlE5JB756kISsz+rauguYMDi9enLA8hbXd2NBicIbLAoGBAM/9
-UxEkgY2+/Eltz0idDSDWpD/DiXgNV8YE7fmZQkE5FZDjnmwGPpfyKjX+gN1dvmk8
+UxEkgY2+/Eltz0idDSDWpD/DiXgNV8YE7fmZQkE9FZDjnmwGPpfyKjX+gN1dvmk8
 qjBsJ6u5DkzyA30IyzUVxaz6Qq0/z1SHzNABoN1leB4ASxruMFSoaeWkb17dKAQ/
 KDC/U447VVI5fDatrqsFB1F0CO470KQukTaiouqXAoGBAObKGycD+CqkzS7auJZV
 HZTLWhx0PKQXPFu2zWR7omjdeUyp3pt2sVOvwAk3XeNENSixqg+/6EyndUgrwJD3
