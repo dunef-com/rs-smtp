@@ -3,6 +3,7 @@ use async_trait::async_trait;
 use mail_send::SmtpClientBuilder;
 use mail_send::mail_auth::common::crypto::{RsaKey, Sha256};
 use mail_send::mail_auth::dkim::DkimSigner;
+use rs_smtp::sasl;
 use rustls_pemfile::{certs, pkcs8_private_keys};
 use tokio::io::{self, AsyncReadExt, AsyncRead};
 use tokio_rustls::rustls::{self, Certificate, PrivateKey};
