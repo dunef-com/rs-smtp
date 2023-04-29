@@ -1,0 +1,22 @@
+[package]
+authors = ["Nick Westendorf <nick@dunef.io>"]
+edition = "2021"
+license = "MIT"
+name = "examples"
+publish = false
+version = "0.1.0"
+
+[[bin]]
+name = "simple"
+path = "src/simple.rs"
+
+[[bin]]
+name = "with-starttls-support"
+path = "src/with_starttls_support.rs"
+
+[[bin]]
+name = "outbound-server"
+path = "src/outbound_server.rs"
+
+[dependencies]
+rs-smtp = "1"

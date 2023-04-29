@@ -1,5 +1,6 @@
 use anyhow::Result;
 use async_trait::async_trait;
+use rs_smtp::sasl;
 use tokio::io::{AsyncReadExt, AsyncRead};
 
 use rs_smtp::backend::{Backend, Session, MailOptions};
@@ -20,11 +21,8 @@ impl Backend for MyBackend {
 
 #[async_trait]
 impl Session for MySession {
-    async fn auth_plain(&mut self, username: &str, password: &str) -> Result<()> {
-        println!("username: {username}");
-        println!("password: {password}");
-
-        Ok(())
+    fn authenticators(&mut self) -> Vec<Box<dyn sasl::Server>> {
+        vec!()
     }
     
     async fn mail(&mut self, from: &str, _: &MailOptions) -> Result<()> {

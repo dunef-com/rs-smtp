@@ -1,12 +1,8 @@
-use crate::conn::Conn;
-use crate::data::SMTPError;
+use crate::{conn::Conn, sasl};
 
 use async_trait::async_trait;
 
-use anyhow::{
-    anyhow,
-    Result,
-};
+use anyhow::Result;
 
 use tokio::io::AsyncRead;
 
@@ -44,8 +40,8 @@ impl MailOptions {
 
 #[async_trait]
 pub trait Session {
-    async fn auth_plain(&mut self, _username: &str, _password: &str) -> Result<()> {
-        Err(anyhow!(SMTPError::err_auth_unsupported().error()))
+    fn authenticators(&mut self) -> Vec<Box<dyn sasl::Server>> {
+        Vec::new()
     }
 
     async fn mail(&mut self, from: &str, opts: &MailOptions) -> Result<()>;

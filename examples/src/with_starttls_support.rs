@@ -1,5 +1,6 @@
 use anyhow::Result;
 use async_trait::async_trait;
+use rs_smtp::sasl;
 use rustls_pemfile::{certs, pkcs8_private_keys};
 use tokio::io::{self, AsyncReadExt, AsyncRead};
 use tokio_rustls::rustls::{self, Certificate, PrivateKey};
@@ -27,10 +28,10 @@ impl Backend for MyBackend {
 
 #[async_trait]
 impl Session for MySession {
-    async fn auth_plain(&mut self, _username: &str, _password: &str) -> Result<()> {
-        Ok(())
+    fn authenticators(&mut self) -> Vec<Box<dyn sasl::Server>> {
+        vec!()
     }
-    
+
     async fn mail(&mut self, from: &str, _: &MailOptions) -> Result<()> {
         println!("mail from: {}", from);
         Ok(())
